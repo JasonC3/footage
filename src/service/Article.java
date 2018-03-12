@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import dao.*;
 import ifc.*;
 
-public class Article implements IData {
+public class Article implements IData, ILayout, ISumary {
 	public static int getIncreasedID() {
 		int i=-1;
 		try {
@@ -230,13 +230,12 @@ public class Article implements IData {
 	}
 
 	@Override
-	public int save(boolean overwrite) {
+	public void save(boolean overwrite) {
 		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override
-	public int load(boolean overwrite) {
+	public void load(boolean overwrite) {
 		// TODO Auto-generated method stub
 		try {
 			String sql=new String("select SID, GID, DID, PID, Title, DateWrote, DateReceived, Score, TID, Content, Length, IsVoid, IsPost, PostTID, PageTID, PostTitle from article where AID=?;");
@@ -257,17 +256,9 @@ public class Article implements IData {
 			}
 			else {
 				db.close();
-				return 0;
 			}
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
-		return 1;
-	}
-
-	@Override
-	public boolean format() {
-		// TODO Auto-generated method stub
-		return false;
 	}
 }

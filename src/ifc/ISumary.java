@@ -1,6 +1,8 @@
 package ifc;
 
-public interface ISumary {
-	public Object getSum(int[] condid, Object[] condition);
-	public Object listDetail();
+import java.util.Map;
+
+public interface ISumary<T> {
+	public T getSum(Map<String, Object> cond);
+	public ILayout[] listDetail();
 }
