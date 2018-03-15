@@ -1,13 +1,13 @@
-package service;
+package dao;
 
 import java.io.*;
 import java.util.*;
 
 public class Configures {
-	public static final String def="/default.properties";
-	public static final InputStream defins=Configures.class.getResourceAsStream(def);
+	protected static final String def="/default.properties";
+	protected static final InputStream defins=Configures.class.getResourceAsStream(def);
 	
-	public Properties defaults;
+	public Properties defaults,settings;
 	
 	public Configures() {
 		this.defaults=new Properties();

@@ -6,11 +6,18 @@ import java.sql.SQLException;
 import dao.*;
 import ifc.*;
 
-public class Article implements IData, ILayout, ISumary {
-	public static int getIncreasedID() {
+public class Article implements IData, ILayout, ISumary<Integer> {
+	public static int getIncreasedID(int period) {
 		int i=-1;
 		try {
-			DBConnection db=new DBConnection("select max(aid) from article;");
+			String sql;
+			if(period==-1)
+				sql=new String("select max(aid) from article;");
+			else
+				sql=new String("select max(aid) from article where tid=?;");
+			DBConnection db=new DBConnection(sql);
+			if(period!=-1)
+				db.state.setInt(1, period);
 			ResultSet rs=db.state.executeQuery();
 			rs.next();
 			i=rs.getInt(1)+1;
@@ -39,16 +46,16 @@ public class Article implements IData, ILayout, ISumary {
 	private Map<Integer, Double> grade;
 
 	public Article() {
-		this(getIncreasedID(), false);
+		this(getIncreasedID(-1), false);
 	}
 	
 	public Article(int id) {
 		this(id, false);
 	}
 	
-	public Article(int id, boolean load) {
-		this.id=id;
-		if(load)
+	public Article(int id, boolean loading) {
+		this.setID(id);
+		if(loading)
 			this.load(true);
 	}
 	
@@ -58,7 +65,6 @@ public class Article implements IData, ILayout, ISumary {
 	
 	public void setID(int id) {
 		this.id=id;
-		load(false);
 	}
 
 	public Department getSentDepartment() {
@@ -260,5 +266,35 @@ public class Article implements IData, ILayout, ISumary {
 		} catch(SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public Integer getSum(Map<String, Object> cond) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ILayout[] listDetail() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String[] getDetail(int index) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String[] getRecord(Map<String, Object> cond, Map<String, String> order) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String[] getColumn() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

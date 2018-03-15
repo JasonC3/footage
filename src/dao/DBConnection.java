@@ -5,20 +5,16 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import ifc.ICSet;
 
 public class DBConnection {
-	public static final String url = "jdbc:mysql://localhost/footage?useUnicode=true&characterEncoding=utf-8&useSSL=false";
-	public static final String name = "com.mysql.jdbc.Driver";
-	public static final String user = "webaccess";
-	public static final String password = "SKItys*%275*#$";
-	
 	public Connection conn = null;
 	public PreparedStatement state = null;
 	
 	public DBConnection(String sql) {
 		try {
-			Class.forName(name);
-			conn = DriverManager.getConnection(url,user,password);
+			Class.forName(ICSet.DBC_DRIVER);
+			conn = DriverManager.getConnection(ICSet.DBC_SOURCE,ICSet.DBC_LOGUSER,ICSet.DBC_LOGPASS);
 			if(sql!=null)
 				state = conn.prepareStatement(sql);
 			else
