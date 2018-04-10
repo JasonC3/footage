@@ -1,29 +1,32 @@
 package service;
 
 import java.util.*;
+
+import doa.*;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import dao.*;
+
 import ifc.*;
 
-public class Article implements IData, ILayout, ISumary<Integer> {
+public class Article implements IData, IList, ISumary<Integer> {
 	public static int getIncreasedID(int period) {
-		int i=-1;
+		int i = -1;
 		try {
 			String sql;
-			if(period==-1)
-				sql=new String("select max(aid) from article;");
+			if (period == -1)
+				sql = new String("select max(aid) from article;");
 			else
-				sql=new String("select max(aid) from article where tid=?;");
-			DBConnection db=new DBConnection(sql);
-			if(period!=-1)
+				sql = new String("select max(aid) from article where tid=?;");
+			DBConnection db = new DBConnection(sql);
+			if (period != -1)
 				db.state.setInt(1, period);
-			ResultSet rs=db.state.executeQuery();
+			ResultSet rs = db.state.executeQuery();
 			rs.next();
-			i=rs.getInt(1)+1;
+			i = rs.getInt(1) + 1;
 			rs.close();
 			db.close();
-		} catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return i;
@@ -48,23 +51,23 @@ public class Article implements IData, ILayout, ISumary<Integer> {
 	public Article() {
 		this(getIncreasedID(-1), false);
 	}
-	
+
 	public Article(int id) {
 		this(id, false);
 	}
-	
+
 	public Article(int id, boolean loading) {
 		this.setID(id);
-		if(loading)
+		if (loading)
 			this.load(true);
 	}
-	
+
 	public int getID() {
 		return id;
 	}
-	
+
 	public void setID(int id) {
-		this.id=id;
+		this.id = id;
 	}
 
 	public Department getSentDepartment() {
@@ -72,7 +75,7 @@ public class Article implements IData, ILayout, ISumary<Integer> {
 	}
 
 	public void setSentDepartment(Department dept) {
-		sent_dept=dept;
+		sent_dept = dept;
 	}
 
 	public Author getAuthor() {
@@ -80,7 +83,7 @@ public class Article implements IData, ILayout, ISumary<Integer> {
 	}
 
 	public void setAuthor(Author author) {
-		au=author;
+		au = author;
 	}
 
 	public Status getStatus() {
@@ -88,7 +91,7 @@ public class Article implements IData, ILayout, ISumary<Integer> {
 	}
 
 	public void setStatus(Status stat) {
-		this.stat=stat;
+		this.stat = stat;
 	}
 
 	public Category getCategory() {
@@ -96,7 +99,7 @@ public class Article implements IData, ILayout, ISumary<Integer> {
 	}
 
 	public void setCategory(Category cate) {
-		this.cate=cate;
+		this.cate = cate;
 	}
 
 	public String getTitle() {
@@ -104,7 +107,7 @@ public class Article implements IData, ILayout, ISumary<Integer> {
 	}
 
 	public void setTitle(String title) {
-		this.title=title;
+		this.title = title;
 	}
 
 	public String getFinalTitle() {
@@ -112,7 +115,7 @@ public class Article implements IData, ILayout, ISumary<Integer> {
 	}
 
 	public void setFinalTitle(String title) {
-		fin_title=title;
+		fin_title = title;
 	}
 
 	public String getContent() {
@@ -120,11 +123,11 @@ public class Article implements IData, ILayout, ISumary<Integer> {
 	}
 
 	public void setContent(String text) {
-		content=text;
+		content = text;
 	}
 
 	public int getSize() {
-		length=content.length();
+		length = content.length();
 		return length;
 	}
 
@@ -133,7 +136,7 @@ public class Article implements IData, ILayout, ISumary<Integer> {
 	}
 
 	public void setWroteDate(Date date) {
-		wrote=date;
+		wrote = date;
 	}
 
 	public Date getReceivedDate() {
@@ -141,7 +144,7 @@ public class Article implements IData, ILayout, ISumary<Integer> {
 	}
 
 	public void setReceivedDate(Date date) {
-		received=date;
+		received = date;
 	}
 
 	public Term getPeriod() {
@@ -149,7 +152,7 @@ public class Article implements IData, ILayout, ISumary<Integer> {
 	}
 
 	public void setPeriod(Term term) {
-		period=term;
+		period = term;
 	}
 
 	public Term getTerm() {
@@ -173,63 +176,63 @@ public class Article implements IData, ILayout, ISumary<Integer> {
 	}
 
 	public double[] getGrade() {
-		double[] r=new double[grade.size()];
-		for(int i=r.length;i>1;i--)
-			r[i-1]=grade.get(i);
-		return r;		
+		double[] r = new double[grade.size()];
+		for (int i = r.length; i > 1; i--)
+			r[i - 1] = grade.get(i);
+		return r;
 	}
 
 	public Judge[] getJury() {
-		Judge[] j=new Judge[jury.size()];
-		for(int i=j.length;i>1;i--)
-			j[i-1]=(Judge)jury.get(i);
+		Judge[] j = new Judge[jury.size()];
+		for (int i = j.length; i > 1; i--)
+			j[i - 1] = (Judge) jury.get(i);
 		return j;
 	}
 
 	public Author getCooperator() {
-		
+
 	}
 
 	public String getCooperateCause() {
-		
+
 	}
 
 	public int getCooperationTimes() {
 		return co_oper.size();
 	}
-	
+
 	public void addCooperation(Author opertor, String cause) {
-		
+
 	}
-	
+
 	public void removeCooperation(int rank) {
-		
+
 	}
 
 	public void judge(Judge man, double grade) {
-		
+
 	}
-	
+
 	public void judge(Judge[] man, double[] grade) {
-		
+
 	}
 
 	public void computeScore() {
-		
+
 	}
 
 	public void postAt() {
-		
+
 	}
-	
+
 	public void disable() {
-		String sql=new String("update article set isVoid=true where AID=?;");
+		String sql = new String("update article set isVoid=true where AID=?;");
 		try {
-			DBConnection db=new DBConnection(sql);
+			DBConnection db = new DBConnection(sql);
 			db.state.setInt(1, id);
 			db.state.executeUpdate();
 			db.close();
-			void_flag=true;
+			void_flag = true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -244,57 +247,28 @@ public class Article implements IData, ILayout, ISumary<Integer> {
 	public void load(boolean overwrite) {
 		// TODO Auto-generated method stub
 		try {
-			String sql=new String("select SID, GID, DID, PID, Title, DateWrote, DateReceived, Score, TID, Content, Length, IsVoid, IsPost, PostTID, PageTID, PostTitle from article where AID=?;");
-			DBConnection db=new DBConnection(sql);
+			String sql = new String(
+					"select SID, GID, DID, PID, Title, DateWrote, DateReceived, Score, TID, Content, Length, IsVoid, IsPost, PostTID, PageTID, PostTitle from article where AID=?;");
+			DBConnection db = new DBConnection(sql);
 			db.state.setInt(1, this.id);
-			if(db.state.execute()) {
-				ResultSet rs=db.state.getResultSet();
-				int i=rs.getInt(1);
-				Configures cfg=new Configures();
-				if(this.stat==null)
-					this.stat=new Status(i,true);
-				else if(this.stat.getID()!=i&&overwrite)
-					this.stat.setID(i,true);
+			if (db.state.execute()) {
+				ResultSet rs = db.state.getResultSet();
+				int i = rs.getInt(1);
+				Configures cfg = new Configures();
+				if (this.stat == null)
+					this.stat = new Status(i, true);
+				else if (this.stat.getID() != i && overwrite)
+					this.stat.setID(i, true);
 				else
-					this.stat.setID(cfg.defaults.getProperty("STATUS"),true);
+					this.stat.setID(cfg.defaults.getProperty("STATUS"), true);
 				rs.close();
 				db.close();
-			}
-			else {
+			} else {
 				db.close();
 			}
-		} catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	@Override
-	public Integer getSum(Map<String, Object> cond) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ILayout[] listDetail() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String[] getDetail(int index) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String[] getRecord(Map<String, Object> cond, Map<String, String> order) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String[] getColumn() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

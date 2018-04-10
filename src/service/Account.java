@@ -1,149 +1,250 @@
 package service;
 
 import java.security.MessageDigest;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
-import dao.Configures;
-import dao.DBConnection;
+import java.util.Calendar;
+
+import doa.Configures;
+import doa.DBConnection;
 import ifc.*;
 
 public class Account implements IData, IIdentity<String> {
 	public static final String MD5(String s) {
+		if (s == null)
+			s = "";
 		try {
-			MessageDigest md=MessageDigest.getInstance("MD5");
-			byte[] b=md.digest(s.getBytes("utf-8"));
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			byte[] b = md.digest(s.getBytes("utf-8"));
 			return toHex(b);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public static final String toHex(byte[] b) {
-		final char[] HEX_DIGITS="0132456789ABCDEF".toCharArray();
-		StringBuilder ret=new StringBuilder(b.length*2);
-		for(int i=0;i<b.length;i++) {
-			ret.append(HEX_DIGITS[(b[i]>>4)& 0x0f]);
-			ret.append(HEX_DIGITS[b[i]& 0x0f]);
+		final char[] HEX_DIGITS = "0132456789ABCDEF".toCharArray();
+		StringBuilder ret = new StringBuilder(b.length * 2);
+		for (int i = 0; i < b.length; i++) {
+			ret.append(HEX_DIGITS[(b[i] >> 4) & 0x0f]);
+			ret.append(HEX_DIGITS[b[i] & 0x0f]);
 		}
 		return ret.toString();
 	}
-	
-	private String username,password,log;
+
+	private int permission;
+	private String username, password, log;
+	private Timestamp expired;
 	private Person owner;
-	
-	public Account(String user,String pwd) {
-		this(user);
-		this.setPassword(pwd);
+
+	public Account(String user, String pwd) {
+		setID(user);
+		setPassword(pwd);
+		setOwner(null);
 	}
-	
+
 	public Account(String user) {
-		this.setID(user);
-		this.setOwner(null);
+		this(user, "");
 	}
-	
+
 	public Account() {
-		this(null);
+		this("", "");
 	}
-	
+
 	public String getPassword() {
 		return password;
 	}
-	
+
 	public void setPassword(String pwd) {
-		this.password=this.MD5(pwd);
+		password = Account.MD5(pwd);
 	}
-	
+
 	public Person getOwner() {
-		return this.owner;
+		return owner;
 	}
-	
+
+	public void setOwner(Person man) {
+		owner = man;
+	}
+
+	public int getPermission() {
+		return permission;
+	}
+
+	public void setPermission(int right) {
+		permission = right;
+	}
+
 	public boolean login() {
-		String pwd;
-		DBConnection db=new DBConnection(null);
+		// Had User & Password
+		if (username.isEmpty() || password.isEmpty())
+			return false;
 		try {
-			if(db.state.execute("select password, log, expired from account where username=?")) {
-				ResultSet rs=db.state.getResultSet();
-				if(rs.next()) {
-					if(this.password.equals(rs.getString(1))) {
+			DBConnection db = new DBConnection("select password, expired, log, username from account where username=?",
+					true);
+			db.state.setString(1, username);
+			if (db.state.execute()) {
+				ResultSet rs = db.state.getResultSet();
+				if (rs.next()) {
+					// Verify Password
+					if (!password.equals(rs.getString(1))) {
 						rs.close();
 						db.close();
 						return false;
 					}
-					Configures cfg=new Configures();
-					Date d=new Date(Long.parseLong(cfg.defaults.getProperty("DEFAULT_EXPIRED"))+System.currentTimeMillis());
-					rs.updateDate("expired", d);
-					String log;
-					log=this.MD5(this.password.concat(d.getDay()))
+					// Create & update log info and expired time
+					Configures cfg = new Configures();
+					Calendar ca = Calendar.getInstance();
+					ca.add(Calendar.HOUR_OF_DAY, Integer.parseInt(cfg.defaults.getProperty("DEFAULT_EXPIRED")));
+					this.expired = new Timestamp(ca.getTimeInMillis());
+					rs.updateTimestamp(2, expired);
+					log = Account.MD5(expired.toString().concat(password));
+					rs.updateString("log", log);
+					rs.updateRow();
+					rs.close();
+					db.close();
+					return true;
 				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		this.load(true);
+		load();
 		return true;
 	}
-	
-	public void logout() {		
-	}
 
-	@Override
-	public void save(boolean overwrite) {
-		// TODO Auto-generated method stub
+	public void logout() {
 		try {
-			String sql;
-			DBConnection db;
-			if(!overwrite) {
-				db=new DBConnection("update account set aid=? where username=? and aid is null");
-				if(this.owner==null)
-					db.state.setNull(1,Types.INTEGER);
-				else
-					db.state.setInt(1, this.owner.getID());
-				db.state.setString(2, this.username);
-			} else {
-				db=new DBConnection("update account set password=?, aid=? where username=?");
-				db.state.setString(1, this.password);
-				if(this.owner==null)
-					db.state.setNull(2,Types.INTEGER);
-				else
-					db.state.setInt(2, this.owner.getID());
-				db.state.setString(3, this.username);
-			}
+			DBConnection db = new DBConnection("update account set expired=null, log=null where username=?");
+			db.state.setString(1, username);
 			db.state.executeUpdate();
-		} catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 
-	@Override
-	public void load(boolean overwrite) {
-		// TODO Auto-generated method stub
+	public boolean verify() {
+		if (this.log == null || this.log.isEmpty())
+			return false;
 		try {
-			DBConnection db;
-			db=new DBConnection("select password, aid from account where username=?");
-			db.state.setString(1, this.username);
-			ResultSet rs=db.state.executeQuery();
-			if(rs.next()) {
-				if(overwrite)
-					this.setPassword(rs.getString(1));
-				if(this.owner==null||(overwrite&&this.owner.getID()!=rs.getInt(2)))
-					this.owner=new Person(rs.getInt(2));
-			}
-		} catch(SQLException e) {
+			DBConnection db = new DBConnection("select expired from account where username=? and log=?");
+			db.state.setString(1, username);
+			db.state.setString(2, log);
+			ResultSet rs = db.state.executeQuery();
+			if (rs.next() && rs.getTimestamp(1).after(new Timestamp(System.currentTimeMillis())))
+				return true;
+			else
+				return false;
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		return false;
+	}
+
+	public String getLog() {
+		return log;
+	}
+
+	public Timestamp getExpiredTime() {
+		return expired;
 	}
 
 	@Override
 	public void setID(String id) {
 		// TODO Auto-generated method stub
-		this.username=id;
+		if (id != null)
+			username = id;
 	}
 
 	@Override
 	public String getID() {
 		// TODO Auto-generated method stub
-		return this.username;
+		return username;
+	}
+
+	@Override
+	public boolean exists(String id) {
+		try {
+			DBConnection db = new DBConnection("select password from account where username=?");
+			db.state.setString(1, username);
+			ResultSet rs = db.state.executeQuery();
+			if (rs.next())
+				return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	@Override
+	public void save() {
+		// TODO Auto-generated method stub
+		try {
+			DBConnection db;
+			db = new DBConnection("update account set password=?, pid=? where username=?");
+			db.state.setString(1, password);
+			if (owner == null)
+				db.state.setNull(2, Types.INTEGER);
+			else
+				db.state.setInt(2, owner.getID());
+			db.state.setString(3, username);
+			db.state.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void load() {
+		// TODO Auto-generated method stub
+		try {
+			DBConnection db = new DBConnection("select password, pid, permission from account where username=?");
+			db.state.setString(1, username);
+			ResultSet rs = db.state.executeQuery();
+			if (rs.next()) {
+				setPassword(rs.getString("password"));
+				setPermission(rs.getInt("permission"));
+				if (owner == null || owner.getID() != rs.getInt(2))
+					owner = new Person(rs.getInt(2));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void insert() {
+		// TODO Auto-generated method stub
+		if (!exists(username)) {
+			try {
+				DBConnection db;
+				db = new DBConnection("insert account (username, password, pid, permission) value (?, ?, ?, ?)");
+				db.state.setString(1, username);
+				db.state.setString(2, password);
+				if (owner == null)
+					db.state.setNull(3, Types.INTEGER);
+				else
+					db.state.setInt(3, owner.getID());
+				db.state.setInt(4, permission);
+				db.state.executeUpdate();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	public void delete() {
+		// TODO Auto-generated method stub
+		try {
+			DBConnection db;
+			db = new DBConnection("delete from account where username=?");
+			db.state.setString(1, username);
+			db.state.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }

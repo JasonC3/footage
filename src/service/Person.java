@@ -4,13 +4,13 @@ import java.util.*;
 
 import ifc.*;
 
-public class Person implements IIdentity<Integer>, ILayout, ITree<Article>, IData {
+public class Person implements IIdentity<Integer>, IList, ITree<Article>, IData {
 	private Map<Integer, Article> arti;
-	
+
 	public Person() {
-		
+
 	}
-	
+
 	public Person(int index) {
 		this.setID(index);
 		this.load(false);
@@ -19,7 +19,7 @@ public class Person implements IIdentity<Integer>, ILayout, ITree<Article>, IDat
 	@Override
 	public void setID(Integer id) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class Person implements IIdentity<Integer>, ILayout, ITree<Article>, IDat
 	@Override
 	public Article getChild(int index) {
 		// TODO Auto-generated method stub
-		return (Article)arti.get(index);
+		return (Article) arti.get(index);
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class Person implements IIdentity<Integer>, ILayout, ITree<Article>, IDat
 	}
 
 	@Override
-	public ILayout listChild() {
+	public IList listChild() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -55,13 +55,13 @@ public class Person implements IIdentity<Integer>, ILayout, ITree<Article>, IDat
 	@Override
 	public void save(boolean overwrite) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void load(boolean overwrite) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -97,13 +97,13 @@ public class Person implements IIdentity<Integer>, ILayout, ITree<Article>, IDat
 	@Override
 	public void setPageDiv(int div) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setPage(int page) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override

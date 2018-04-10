@@ -1,21 +1,13 @@
 package ifc;
 
-import java.util.Map;
-
+/**
+ * Refreshable display
+ * 
+ * @author Jason Chen
+ * @version 0.30a
+ */
 public interface ILayout {
-	public Map<String, Object> getDetail(int index);
+	public void draw();
 
-	public String[][] getRecord(Map<String, Object> cond, Map<String, String> order);
-
-	public String[] getKey();
-
-	public String[] getTitle();
-
-	public int getCount();
-
-	public void setPageDiv(int div);
-
-	public void setPage(int page);
-
-	public int getPage();
+	public void refresh();
 }
